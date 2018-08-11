@@ -3,6 +3,7 @@
 
 from bs4 import BeautifulSoup
 import re
+import csv
 
 #### Listes de mots utilisées dans le script ###
 
@@ -95,7 +96,14 @@ def extract_name(element):
                     nom +=contenu[:index_mot1 + len(mot[1])]
                     mot = mot[1:]
 
-                
+def save_tableau(liste_sauvegarde, fichier_final):
+    """ Le but de cette fonction est de sauvegarder les informations extraites de la page internet sous la fonme d'un tableau 
+    'Année du décès' 'Personne décedée'"""
+    fichier_final.writerow(["Année", "Personne décédée"])  
+    for i in liste_sauvegarde:
+        if i != None:
+            for j in i[1]:
+                fichier_final.writerow([i[0], j])
 
 ### Main ###
 
@@ -107,11 +115,13 @@ content_text = soup.find(id="mw-content-text")
 
 #Selection des listes contenant les informations qui nous intéressent : les années, et les morts associés.
 liste_interet = extract_year(content_text)
-#
 liste_mort = []
 for i in liste_interet:
     liste_mort.append(year_event(i))
-    #Creer ici le tableau a printer
+
+#Sauvegarde de la liste sous format csv
+fichier_final = csv.writer(open("Liste_morts_insolites.csv", "wt"), delimiter = ',')
+save_tableau(liste_mort, fichier_final)
 
 #print(year_event(liste_interet))
 #print(list(liste_interet[-2].ul.children))
