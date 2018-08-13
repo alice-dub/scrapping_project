@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-
 from bs4 import BeautifulSoup
 import re
 import csv
+import urllib.request
 
 #### Listes de mots utilisées dans le script ###
 
@@ -70,8 +70,7 @@ def extract_name(element):
     if premier_mot[0].lower() in articles_definis: 
     #Si la proposition principale commence par un article défini, on retire cet article     
         contenu = contenu[2:] 
-    
-    
+        
     mot = re.findall('([A-Z]\w+)', contenu) # Recherche du premier mot contenant une majuscule
     if len(mot) == 0:
         return # Si il n'y a pas de non avec une majuscule, la fonction ne renvoie rien
@@ -107,8 +106,10 @@ def save_tableau(liste_sauvegarde, fichier_final):
 
 ### Main ###
 
-with open("Liste_de_morts_insolites") as fp:
-    soup = BeautifulSoup(fp,"html")
+with urllib.request.urlopen("https://fr.wikipedia.org/wiki/Liste_de_morts_insolites") as page:
+    page_a_scrapper = page.read()
+
+soup = BeautifulSoup(page_a_scrapper,"lxml")
 
 #Selection du contenu de la page wikipedia
 content_text = soup.find(id="mw-content-text")
@@ -120,8 +121,8 @@ for i in liste_interet:
     liste_mort.append(year_event(i))
 
 #Sauvegarde de la liste sous format csv
-fichier_final = csv.writer(open("Liste_morts_insolites.csv", "wt"), delimiter = ',')
-save_tableau(liste_mort, fichier_final)
 
-#print(year_event(liste_interet))
-#print(list(liste_interet[-2].ul.children))
+with open("Liste_morts_insolites.csv", 'w') as csvFile:
+    fichier_final = csv.writer(csvFile)
+    save_tableau(liste_mort, fichier_final)
+csvFile.close()
